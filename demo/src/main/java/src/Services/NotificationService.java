@@ -80,4 +80,23 @@ public class NotificationService {
       throw  new RuntimeException(e.getLocalizedMessage());
     }
   }
+
+  public String getTitleByNotificationType(String notificationType) {
+    return switch (notificationType) {
+      case "MESSAGE" -> "New Message Received!";
+      case "ORDER_CONFIRMED" -> "Your Order is Confirmed!";
+      case "PAYMENT_SUCCESS" -> "Payment Successful ";
+      case "ALERT" -> "Important Alert!";
+      default -> "New Notification"; // Default title if type is unknown
+    };
+  }
+
+  public ResponseEntity<Notifications> update(Notifications notifications){
+    if(notificationRepository.existsById((long) notifications.getNotificationId())){
+      notificationRepository.save(notifications);
+      return ResponseEntity.ok(notifications);
+    }else{
+      throw new RuntimeException("Notification not found");
+    }
+  }
 }

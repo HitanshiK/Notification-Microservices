@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import src.repos.DeviceRepository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class DeviceServices {
@@ -25,5 +26,11 @@ public class DeviceServices {
 
   public List<Device> findAll(int userId){
     return deviceRepository.find(userId);
+  }
+
+  public List<String> fetchFcmTokens (int id){
+    return deviceRepository.find(id).stream().map(Device :: getFcmToken)
+            .filter(Objects::nonNull)
+            .toList();
   }
 }

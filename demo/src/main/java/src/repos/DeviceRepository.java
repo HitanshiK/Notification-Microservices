@@ -1,5 +1,6 @@
 package src.repos;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import src.models.Device;
@@ -15,4 +16,10 @@ public interface DeviceRepository extends CrudRepository<Device, Long> {
 
   @Query(value = "SELECT * FROM device WHERE userId = :user_id", nativeQuery = true)
   List<Device> find(@Param("user_id") int userId);
+
+  @Modifying
+  @Query(value = "DELETE FROM device WHERE fcm_token IN (:tokens)", nativeQuery = true)
+  void deleteFcmTokens(@Param("tokens") List<String> tokens);
+
+
 }

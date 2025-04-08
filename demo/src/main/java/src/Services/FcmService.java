@@ -11,6 +11,7 @@ import src.repos.DeviceRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FcmService {
@@ -32,15 +33,15 @@ public class FcmService {
             List<String> tokens =deviceService.fetchFcmTokens(user.getId());
 
             if (!tokens.isEmpty()) {
-                List<Message> messages = tokens.stream()
-                        .map(token -> Message.builder()
-                                .setToken(token)
-                                .setNotification(Notification.builder()
-                                        .setTitle(title)
-                                        .setBody(notification.getContent())
-                                        .build())
-                                .build())
-                        .toList();
+              List<Message> messages = tokens.stream()
+                .map(token -> Message.builder()
+                  .setToken(token)
+                  .setNotification(Notification.builder()
+                    .setTitle(title)
+                    .setBody(notification.getContent())
+                    .build())
+                  .build())
+                .collect(Collectors.toList());
 
                 try {
                     BatchResponse response = FirebaseMessaging.getInstance().sendEach(messages);
@@ -49,6 +50,16 @@ public class FcmService {
                     if(response.getSuccessCount()>0){
                         notification.setStatus(NotificationStatus.SENT);
                         notificationService.update(notification);
+                    }else{
+                      if(notification.getAttempts()==3){
+                        notification.setStatus(NotificationStatus.FAILED);
+                        notification.setErrorMessage(response.getResponses().get(0).getException().getMessage());
+                        notificationService.update(notification);
+                      }else{
+                        //retry Mechanism
+
+
+                      }
                     }
                     List<SendResponse>responses = response.getResponses();
                     List<Token> failedTokens = new ArrayList<>();
@@ -90,8 +101,8 @@ public class FcmService {
             }
 
             if (!invalidTokens.isEmpty()) {
-                deviceRepository.deleteByFcmTokenIn(invalidTokens); // Remove invalid tokens
-                System.out.println("Removed invalid FCM tokens: " + invalidTokens);
+              deviceService.deleteByFcmToken(invalidTokens);
+                System.out.println("Removed invalid FCM tokens: " + invalidTokens.size());
             }
         } catch (Exception e) {
             throw new RuntimeException(e.getCause());

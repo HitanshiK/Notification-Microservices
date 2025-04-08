@@ -1,5 +1,6 @@
 package src.Services;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import src.models.Device;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import src.repos.DeviceRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class DeviceServices {
@@ -31,6 +33,15 @@ public class DeviceServices {
   public List<String> fetchFcmTokens (int id){
     return deviceRepository.find(id).stream().map(Device :: getFcmToken)
             .filter(Objects::nonNull)
-            .toList();
+            .collect(Collectors.toList());
+  }
+
+  public Boolean deleteByFcmToken(List<String> tokens){
+    try{
+      deviceRepository.deleteFcmTokens(tokens);
+      return true;
+    }catch (Exception e){
+      throw new RuntimeException(e.getLocalizedMessage());
+    }
   }
 }

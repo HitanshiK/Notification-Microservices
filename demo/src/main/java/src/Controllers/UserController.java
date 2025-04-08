@@ -1,6 +1,7 @@
 package src.Controllers;
 
 
+import org.springframework.http.ResponseEntity;
 import src.Services.UserServices;
 import src.models.Device;
 import src.models.User;
@@ -19,7 +20,7 @@ public class UserController {
   }
 
   @PostMapping("/add")
-  public User createUser(@RequestBody User user){
+  public ResponseEntity<User> createUser(@RequestBody User user){
     try{
       return userServices.save(user);
     } catch (RuntimeException e) {

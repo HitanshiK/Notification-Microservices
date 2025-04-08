@@ -39,7 +39,14 @@ public class UserServices {
   public Device addDeviceToUser(int id,Device device){
     return userRepository.findById(id).map(user -> {
       device.setUser(user);
-      return deviceRepository.save(device);
+      if(deviceRepository.existsById((long) device.getId())) {
+        Device oldDevice = new Device();
+        oldDevice.setFcmToken(device.getFcmToken());
+        oldDevice.setLastUsedAt(System.currentTimeMillis());
+        return deviceRepository.save(oldDevice);
+      }else{
+        return deviceRepository.save(device);
+      }
     }).orElseThrow(() -> new RuntimeException("User not found"));
   }
 

@@ -26,6 +26,7 @@ public class NotificationProducer {
       message.put("email",event.getEmail());
       message.put("content",event.getContent());
       message.put("type",event.getType());
+      message.put("priority", String.valueOf(event.getPriority()));
     }
 
     // Add message to Redis Stream

@@ -7,13 +7,12 @@ import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import src.Services.NotificationService;
+import src.enums.Priority;
+import src.models.Events;
 import src.models.Notifications;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class NotificationConsumer {
@@ -54,8 +53,16 @@ public class NotificationConsumer {
             return result;
           });
 
-          if (messages != null && !messages.isEmpty()) {
-            for (Map<String, String> message : messages) {
+          if (messages != null && !messages.isEmpty()) {             // Sort based on priority
+
+              messages.sort((m1, m2) -> {
+                Priority p1 = Priority.valueOf(m1.getOrDefault("priority", "MEDIUM").toUpperCase());
+                Priority p2 = Priority.valueOf(m2.getOrDefault("priority", "MEDIUM").toUpperCase());
+                return p2.ordinal() - p1.ordinal(); // Higher priority first
+              });
+
+
+              for (Map<String, String> message : messages) {
               System.out.println("Received message: " + message);
               processEvent(message);  // Process the event
             }
@@ -78,7 +85,7 @@ public class NotificationConsumer {
 
   private Notifications mapToNotification(Map<String, String> message) {
     return notificationService.createNotificationForEvents(message.get("email"),
-      message.get("type"), message.get("content"));
+      message.get("type"), message.get("content"),message.get("priority"));
   }
 
 }

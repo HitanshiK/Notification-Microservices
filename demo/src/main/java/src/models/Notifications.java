@@ -3,6 +3,7 @@ package src.models;
 import src.enums.NotificationStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import src.enums.Priority;
 
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class Notifications {
   private NotificationStatus status = NotificationStatus.PENDING;  // Status (PENDING, SENT, FAILED)
 
   private Integer attempts = 0;
+
+  private Priority priority = Priority.MEDIUM;
 
   private String errorMessage;
 

@@ -2,10 +2,12 @@ package src.Services.redis;
 
 import io.lettuce.core.StreamMessage;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import src.Services.FcmService;
 import src.Services.NotificationService;
 import src.enums.Priority;
 import src.models.Events;
@@ -25,6 +27,9 @@ public class NotificationConsumer {
     this.redisTemplate = redisTemplate;
     this.notificationService = notificationService;
   }
+
+  @Autowired
+  FcmService fcmService;
 
   @PostConstruct
   public void consumeEvents() {
@@ -79,6 +84,7 @@ public class NotificationConsumer {
 
   private void processEvent(Map<String, String>  message) {
     Notifications notification = mapToNotification(message);
+    fcmService.sendNotification(notification);
     System.out.printf("🔥 Consumed Notification: %s → Email: %s → Message: %s%n",
       notification.getType(), notification.getUser().getEmail(), notification.getContent());
   }

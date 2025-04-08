@@ -44,4 +44,12 @@ public class DeviceServices {
       throw new RuntimeException(e.getLocalizedMessage());
     }
   }
+
+  public Device findByFcmToken(String token){
+    try{
+      return deviceRepository.findToken(token);
+    } catch (Exception e) {
+      throw new RuntimeException(e.getLocalizedMessage());
+    }
+  }
 }

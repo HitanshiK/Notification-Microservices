@@ -21,5 +21,7 @@ public interface DeviceRepository extends CrudRepository<Device, Long> {
   @Query(value = "DELETE FROM device WHERE fcm_token IN (:tokens)", nativeQuery = true)
   void deleteFcmTokens(@Param("tokens") List<String> tokens);
 
+  @Query(value = "SELECT * FROM device WHERE fcm_token = :token", nativeQuery = true)
+  Device findToken(@Param("token") String token);
 
 }

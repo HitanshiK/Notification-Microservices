@@ -40,6 +40,7 @@ public class UserServices {
     return userRepository.findById(id).map(user -> {
       device.setUser(user);
       if(deviceRepository.existsById((long) device.getId())) {
+        //saving new fcm token
         Device oldDevice = new Device();
         oldDevice.setFcmToken(device.getFcmToken());
         oldDevice.setLastUsedAt(System.currentTimeMillis());

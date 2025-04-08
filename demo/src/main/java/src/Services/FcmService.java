@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import src.enums.NotificationStatus;
+import src.models.Device;
 import src.models.Notifications;
 import src.models.User;
 import src.repos.DeviceRepository;
@@ -58,7 +59,6 @@ public class FcmService {
                       }else{
                         //retry Mechanism
 
-
                       }
                     }
                     List<SendResponse>responses = response.getResponses();
@@ -71,6 +71,11 @@ public class FcmService {
                             token.setFcmToken(tokens.get(i));
                             token.setException(res.getException());
                             failedTokens.add(token);
+                        }else{
+                          /*** update device so as to identify which device hasnt beeen used in last 15 days
+                           later  with the help of this we can remove the such device to make it more optimal***/
+                          Device device= deviceService.findByFcmToken(tokens.get(i));
+                          device.setLastUsedAt(System.currentTimeMillis());
                         }
                     }
                     handleInvalidFcmTokens(failedTokens);

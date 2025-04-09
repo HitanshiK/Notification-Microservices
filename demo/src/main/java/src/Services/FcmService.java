@@ -4,6 +4,7 @@ import com.google.firebase.messaging.*;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import src.Services.redis.RetryProducer;
 import src.enums.NotificationStatus;
 import src.models.Device;
 import src.models.Notifications;
@@ -23,6 +24,8 @@ public class FcmService {
     NotificationService notificationService;
     @Autowired
     DeviceRepository deviceRepository;
+    @Autowired
+    RetryProducer retryProducer;
 
     public void sendNotification(Notifications notification) {
 
@@ -58,7 +61,7 @@ public class FcmService {
                         notificationService.update(notification);
                       }else{
                         //retry Mechanism
-
+                        retryProducer.sendToRetryStream(notification);
                       }
                     }
                     List<SendResponse>responses = response.getResponses();
@@ -76,6 +79,7 @@ public class FcmService {
                            later  with the help of this we can remove the such device to make it more optimal***/
                           Device device= deviceService.findByFcmToken(tokens.get(i));
                           device.setLastUsedAt(System.currentTimeMillis());
+                          deviceService.save(device);
                         }
                     }
                     handleInvalidFcmTokens(failedTokens);

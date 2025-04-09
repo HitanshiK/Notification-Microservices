@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import src.Services.redis.RetryProducer;
 import src.enums.NotificationStatus;
+import src.enums.Priority;
 import src.models.Device;
 import src.models.Notifications;
 import src.models.User;
@@ -26,6 +27,14 @@ public class FcmService {
     DeviceRepository deviceRepository;
     @Autowired
     RetryProducer retryProducer;
+
+    private long ttlConfig(Priority priority){
+      switch (priority) {
+        case Priority.HIGH -> 30,
+        case Priority.MEDIUM -> 1800;
+        default -> 86400; // 24 hrs default
+      }
+    }
 
     public void sendNotification(Notifications notification) {
 

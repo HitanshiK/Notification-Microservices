@@ -3,6 +3,7 @@ package src.crons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import src.models.Notifications;
 import src.repos.NotificationRepository;
 
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class Scheduler {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String STREAM_NAME = "notification_stream";

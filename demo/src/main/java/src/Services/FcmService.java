@@ -28,13 +28,19 @@ public class FcmService {
     @Autowired
     RetryProducer retryProducer;
 
-    private long ttlConfig(Priority priority){
-      switch (priority) {
-        case Priority.HIGH -> 30,
-        case Priority.MEDIUM -> 1800;
-        default -> 86400; // 24 hrs default
-      }
+    private long ttlConfig(Priority priority) {
+        switch (priority) {
+            case HIGH:
+                return 30;
+            case MEDIUM:
+                return 1800;
+            case LOW:
+                return 3600;
+            default:
+                return 86400; // 24 hrs default
+        }
     }
+
 
     public void sendNotification(Notifications notification) {
 
@@ -46,15 +52,22 @@ public class FcmService {
             List<String> tokens =deviceService.fetchFcmTokens(user.getId());
 
             if (!tokens.isEmpty()) {
-              List<Message> messages = tokens.stream()
-                .map(token -> Message.builder()
-                  .setToken(token)
-                  .setNotification(Notification.builder()
-                    .setTitle(title)
-                    .setBody(notification.getContent())
-                    .build())
-                  .build())
-                .collect(Collectors.toList());
+                List<Message> messages = tokens.stream()
+                        .map(token -> {
+                            AndroidConfig androidConfig = AndroidConfig.builder()
+                                    .setTtl(ttlConfig(notification.getPriority()) * 1000L) // TTL in milliseconds
+                                    .build();
+
+                            return Message.builder()
+                                    .setToken(token)
+                                    .setNotification(Notification.builder()
+                                            .setTitle(title)
+                                            .setBody(notification.getContent())
+                                            .build())
+                                    .setAndroidConfig(androidConfig)
+                                    .build();
+                        })
+                        .collect(Collectors.toList());
 
                 try {
                     BatchResponse response = FirebaseMessaging.getInstance().sendEach(messages);

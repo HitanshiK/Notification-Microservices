@@ -23,4 +23,10 @@ public class NotificationController {
     return notificationService.createNotificationEvents(requests);
   }
 
+  @PostMapping("/system/push")
+  public ResponseEntity<Events> pushSystem(@RequestBody PushNotificationRequest requests) {
+    requests.setType("SYSTEM");
+    return notificationService.createNotificationEvents(requests);
+  }
+
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import src.enums.Priority;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -33,6 +34,10 @@ public class Notifications {
   private String errorMessage;
 
   private Long createdAt;
+
+  private Boolean isScheduled;
+
+  private Long scheduledTime;
 
   public Notifications() {}
 

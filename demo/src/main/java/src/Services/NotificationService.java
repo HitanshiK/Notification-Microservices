@@ -41,6 +41,10 @@ public class NotificationService {
         event.setContent(request.getContent());
         event.setType(request.getType());
         event.setEmail(request.getEmail());
+        if(request.getScheduledTime()!=null){
+             // Scheduled notifications
+          createScheduledNotifiications(event);
+        }
         producer.sendNotification(event);
         return ResponseEntity.ok(event);
       } else {
@@ -113,5 +117,27 @@ public class NotificationService {
       case "PROMOTION", "FEEDBACK" -> Priority.LOW;
       default -> Priority.MEDIUM;
     };
+  }
+
+  public Notifications createScheduledNotifiications(Events events){
+    try {
+      if (userServices.validateUser(events.getEmail())) {
+
+        Notifications notifications = new Notifications();
+        notifications.setUser(userServices.findUser(events.getEmail()));
+        notifications.setContent(events.getContent());
+        notifications.setDevice(deviceServices.findAll(notifications.getUser().getId()));
+        notifications.setType(events.getType());
+        notifications.setPriority(events.getPriority());
+        notifications.setIsScheduled(true);
+        notifications.setScheduledTime(events.getScheduledTime());
+        save(notifications);
+        return notifications;
+      } else {
+        throw new RuntimeException("User not found");
+      }
+    } catch (RuntimeException e) {
+      throw new RuntimeException(e.getCause());
+    }
   }
 }

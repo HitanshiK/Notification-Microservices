@@ -14,4 +14,6 @@ public class Events {
 
   private Priority priority;
 
+  private Long scheduledTime;
+
 }

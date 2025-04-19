@@ -10,6 +10,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class NotificationMicroserviceApplication  {
 
+  /*** Notification Microservices currently for Push Notifications ,
+   * take a look at Readme file for better understanding of
+   * project workflow and features  ***/
+
   public static void main(String[] args) {
     try{
       SpringApplication.run(NotificationMicroserviceApplication.class, args);

@@ -41,14 +41,16 @@ public class NotificationConsumer {
             List<Map<String, String>> result = new ArrayList<>();
 
             // Reading from the stream
+            Consumer consumer = Consumer.from("notification_group", "consumer-1");
             StreamReadOptions options = StreamReadOptions.empty().count(10).block(Duration.ofMillis(1000));
-            List<ObjectRecord<String, String>> streamMessages = redisTemplate.opsForStream()
-              .read(String.class, options, StreamOffset.create(STREAM_NAME, ReadOffset.lastConsumed()));
+
+            List<MapRecord<String, Object, Object>> streamMessages = redisTemplate.opsForStream()
+              .read(consumer, options, StreamOffset.create(STREAM_NAME, ReadOffset.lastConsumed()));
 
             if (streamMessages != null) {
-              for (ObjectRecord<String, String> message : streamMessages) {
-                String value = message.getValue();  // Use getValue() instead of getBody()
-                Map<String, String> data = Collections.singletonMap("message", value);
+              for (MapRecord<String, Object, Object> message : streamMessages) {
+                Map<Object, Object> messageMap = (Map<Object, Object>) message.getValue();  // Use getValue() instead of getBody()
+                Map<String, String> data = Collections.singletonMap("message", messageMap.toString());
                 result.add(data);
 
                 // Acknowledge message

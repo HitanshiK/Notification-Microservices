@@ -3,10 +3,7 @@ package src.Services.redis;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.stream.ObjectRecord;
-import org.springframework.data.redis.connection.stream.ReadOffset;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.connection.stream.StreamReadOptions;
+import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.RedisTemplate;
 import src.Services.FcmService;
 import src.Services.NotificationService;
@@ -46,15 +43,16 @@ public class RetryConsumer {
             List<Map<String, String>> result = new ArrayList<>();
 
             // Reading from the stream
+            Consumer consumer = Consumer.from("notification_group", "consumer-1");
             StreamReadOptions options = StreamReadOptions.empty().count(10).block(Duration.ofMillis(1000));
 
-            List<ObjectRecord<String, String>> streamMessages = redisTemplate.opsForStream()
-              .read(String.class, options, StreamOffset.create(STREAM_NAME, ReadOffset.lastConsumed()));
+            List<MapRecord<String, Object, Object>> streamMessages = redisTemplate.opsForStream()
+              .read(consumer, options, StreamOffset.create(STREAM_NAME, ReadOffset.lastConsumed()));
 
             if (streamMessages != null) {
-              for (ObjectRecord<String, String> message : streamMessages) {
-                String value = message.getValue();  // Use getValue() instead of getBody()
-                Map<String, String> data = Collections.singletonMap("message", value);
+              for (MapRecord<String, Object, Object> message : streamMessages) {
+                Map<Object, Object> messageMap = (Map<Object, Object>) message.getValue();  // Use getValue() instead of getBody()
+                Map<String, String> data = Collections.singletonMap("message", messageMap.toString());
                 result.add(data);
 
                 // Acknowledge message
